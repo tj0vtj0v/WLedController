@@ -1,14 +1,24 @@
+import json
 from datetime import datetime
 from time import sleep
+from enum import Enum
 
 import requests.exceptions
 
 from exceptions import *
 
 
+class Specifier(Enum):
+    none = ""
+    state = "state"
+    info = "info"
+    effects = "effects"
+    palettes = "palettes"
+
+
 class WLedController:
     def __init__(self, wled_ip_address: str) -> None:
-        self.api_url = f"http://{wled_ip_address}/win"
+        self.api_url = f"http://{wled_ip_address}/json/"
         self.log = True
 
         try:
@@ -20,44 +30,63 @@ class WLedController:
     def _timestamp() -> str:
         return str(datetime.now())[:-7]
 
+    @staticmethod
+    def _build_data(*args: tuple[str: any]):
+        return "{" + ", ".join([f'"{arg[0]}": {arg[1]}' for arg in args]) + "}"
+
+    def _logging(self, msg: str):
+        print(f"{self._timestamp()}: {msg}")
+
     def activate_log(self):
         self.log = True
 
     def deactivate_log(self):
         self.log = False
 
-    def send_arguments(self, *args):
-        statement = self.api_url + "&" + "&".join(args)
+    def get_status(self, specification: Specifier = Specifier.none) -> dict:
+        return requests.get(self.api_url + specification.value).json()
 
+    def send_arguments(self, arguments: str):
         try:
-            requests.put(statement)
+            status = list(json.loads(requests.post(self.api_url, arguments).text))[0]
 
             if self.log:
-                print(statement, flush=True)
+                self._logging(f"{arguments} --> {status}")
+
+            if status == "error":
+                raise ArgumentNotValidException(arguments)
 
         except:
-            raise Exception(f"'{statement}' could not be executed.")
+            self._logging(f"major error occured with argument {arguments}")
+
+            raise Exception(f"'{arguments}' resulted in an Error.")
 
     def activate(self):
-        self.send_arguments("T=1")
+        self.send_arguments(self._build_data(("on", "true")))
 
     def deactivate(self):
-        self.send_arguments("T=0")
+        self.send_arguments(self._build_data(("on", "false")))
 
-    def get_status(self) -> str:
-        return requests.get(self.api_url).text
+    def toggle(self):
+        self.send_arguments(self._build_data(("on", '"t"')))
+
+    def set_brightness(self, brightness: int):
+        if brightness < 0 or brightness > 255:
+            raise ValueOutOfBoundsException(brightness)
+
+        self.send_arguments(self._build_data(("bri", brightness)))
 
     def set_preset(self, preset: int):
-        if preset < 0 or preset > 255:
+        if preset < -1 or preset > 250:
             raise ValueOutOfBoundsException(preset)
 
-        self.send_arguments(f"PL={preset}")
+        self.send_arguments(self._build_data(("ps", preset)))
 
     def set_color(self, color: tuple[int, int, int]):
         if min(color) < 0 or max(color) > 255:
             raise ValueOutOfBoundsException(color, (0, 0, 0), (255, 255, 255))
 
-        self.send_arguments(f"R={color[0]}", f"G={color[1]}", f"B={color[2]}")
+        self.send_arguments(self._build_data(("col", '['+str(list(color))+']')))
 
     def set_effect(self, effect: int):
         if effect < 0 or effect > 101:
@@ -127,3 +156,6 @@ class WLedController:
                 self.set_preset(255)
 
             sleep(timeout)
+
+
+print(WLedController("192.168.178.42").set_color((25, 25, 25)))
