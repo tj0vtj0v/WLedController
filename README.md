@@ -31,3 +31,14 @@ are properly installed and set up.
 #### manually for a single user
 1. download the archive and unpack it.
 2. move the "WLedController" subfolder into the directory your script is located.
+
+### Usage
+To use WLedControll you have to create an Object with the correct IP-Adress of your Controller (ESP-32 in my case).
+```python
+from WLedController import WLedController
+
+with WLedController(wled_ip_address=<IP-Address of WLED Controller>) as WLeds:
+```
+ - wled_ip_address is the IP-Address of your WLED Controller, to find this address
+    - you can look up the connections in fritz.box,
+    - or you install the Mobile-App 'WLED - native' on [Apple](https://apps.apple.com/de/app/wled-native/id6446207239) or [Android](https://play.google.com/store/apps/details?id=ca.cgagnier.wlednativeandroid&hl=gsw&gl=US).
