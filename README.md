@@ -14,7 +14,7 @@ To run WLedController, you have to ensure
  - [Python3](https://www.python.org) with
  - [requests](https://pypi.org/project/requests/)
 
-are properly installed and set up.
+is properly installed and set up.
 
 #### via Pypi
 ```bash
@@ -40,5 +40,5 @@ from WLedController import WLedController
 with WLedController(wled_ip_address=<IP-Address of WLED Controller>) as WLeds:
 ```
  - wled_ip_address is the IP-Address of your WLED Controller, to find this address
-    - you can look up the connections in fritz.box,
+    - you can look up the connections in [fritz.box](https://fritz.box/),
     - or you install the Mobile-App 'WLED - native' on [Apple](https://apps.apple.com/de/app/wled-native/id6446207239) or [Android](https://play.google.com/store/apps/details?id=ca.cgagnier.wlednativeandroid&hl=gsw&gl=US).
