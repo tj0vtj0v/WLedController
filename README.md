@@ -1,9 +1,11 @@
 # WLedController
 
-WLedController is an interface, which enables plain Python controll of your WLEDs.
+WLedController is an interface, which enables plain Python controll of your WLEDs.  
 It utilizes the native WLed json-API, for further information [check out their documentation](https://kno.wled.ge/interfaces/json-api/).
 
 Since this library is currently under constant development, fell free to [submit feedback](https://github.com/tj0vtj0v/WLedController/issues) if there are issues or missing features.
+
+<br />
 
 ## Getting Started
 Here you find instructions how to install and use this library.
@@ -31,6 +33,8 @@ is properly installed and set up.
 #### manually for a single user
 1. download the archive and unpack it.
 2. move the "WLedController" subfolder into the directory your script is located.
+
+<br />
 
 ### Usage
 To use WLedControll you have to create an Object with the correct IP-Adress of your Controller (ESP-32 in my case).
