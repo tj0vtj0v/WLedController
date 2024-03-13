@@ -35,16 +35,13 @@ class WLedController:
         except:
             raise UnreachableSocketException(wled_socket)
 
-
-
-
     # private assisting methods
     @staticmethod
-    def _get_request(request: str):
+    def _get_request(request: str) -> requests.models.Response:
         return requests.get(request)
 
     @staticmethod
-    def _post_request(request: str, arguments: str):
+    def _post_request(request: str, arguments: str) -> requests.models.Response:
         return requests.post(request, arguments)
 
     @staticmethod
@@ -58,27 +55,27 @@ class WLedController:
     def _logging(self, msg: str):
         print(f"{self._timestamp()}: {msg}")
 
-
-
-
     # config settings
-    def activate_log(self):
+    def activate_log(self) -> None:
         self._log = True
 
-    def deactivate_log(self):
+    def deactivate_log(self) -> None:
         self._log = False
 
     # get requests
-    def get_version(self):
-        return self._get_request(self.api_url + "version").text
+    def get_version(self) -> int:
+        return int(self._get_request(self.api_url + "version").text)
 
-    def get_free_heap(self):
-        return self._get_request(self.api_url + "freeheap").text
+    def get_free_heap(self) -> int:
+        return int(self._get_request(self.api_url + "freeheap").text)
 
-    def get_uptime(self):
-        return self._get_request(self.api_url + "uptime").text
+    def get_uptime(self) -> int:
+        return int(self._get_request(self.api_url + "uptime").text)
 
-    def get_status(self, specification: Specifier = Specifier.none, main_key: str = None) -> dict:
+    def get_timer(self) -> int:
+        return self.get_status(Specifier.state, "nl")["rem"]
+
+    def get_status(self, specification: Specifier = Specifier.none, main_key: str = None) -> dict[str: dict[str: any]]:
         response = self._get_request(self.json_url + specification.value).json()
         if main_key:
             try:
@@ -88,48 +85,33 @@ class WLedController:
         else:
             return response
 
-    def get_timer(self):
-        return self.get_status(Specifier.state, "nl")["rem"]
-
-
-
-
     # nonparametric functions
-    def reboot(self):
-        return self._get_request(self.api_url + "reboot").text
+    def reboot(self) -> int:
+        return self._get_request(self.api_url + "reset").status_code
 
-    def activate(self):
+    def activate(self) -> None:
         self.set_arguments(self._build_data(("on", "true")))
 
-    def deactivate(self):
+    def deactivate(self) -> None:
         self.set_arguments(self._build_data(("on", "false")))
 
-    def toggle(self):
+    def toggle(self) -> None:
         self.set_arguments(self._build_data(("on", '"t"')))
 
-    def activate_timer(self):
+    def activate_timer(self) -> None:
         self.set_arguments(self._build_data(("nl.on", 'true')))
 
-    def deactivate_timer(self):
+    def deactivate_timer(self) -> None:
         self.set_arguments(self._build_data(("nl.on", 'false')))
 
-    def activate_live(self):
+    def activate_live(self) -> None:
         self.set_arguments(self._build_data(("live", 'true')))
 
-    def deactivate_live(self):
+    def deactivate_live(self) -> None:
         self.set_arguments(self._build_data(("live", 'false')))
 
-    def freeze(self):
-        self.set_arguments(self._build_data(("frz", 'true')))
-
-    def unfreeze(self):
-        self.set_arguments(self._build_data(("frz", 'false')))
-
-
-
-
     # parametric functions
-    def set_arguments(self, arguments: str):
+    def set_arguments(self, arguments: str) -> None:
         try:
             status = list(json.loads(self._post_request(self.json_url, arguments).text))[0]
 
@@ -145,13 +127,13 @@ class WLedController:
 
             raise Exception(f"'{arguments}' resulted in an Error.")
 
-    def set_brightness(self, brightness: int):
+    def set_brightness(self, brightness: int) -> None:
         if brightness < 0 or brightness > 255:
             raise ValueOutOfBoundsException(brightness)
 
         self.set_arguments(self._build_data(("bri", brightness)))
 
-    def set_transition(self, milliseconds: int):
+    def set_transition(self, milliseconds: int) -> None:
         milliseconds = milliseconds / 100
 
         if milliseconds < 0 or milliseconds > 65535:
@@ -159,46 +141,47 @@ class WLedController:
 
         self.set_arguments(self._build_data(("transition", math.floor(milliseconds))))
 
-    def set_preset(self, preset: int):
+    def set_preset(self, preset: int) -> None:
         if preset < -1 or preset > 250:
             raise ValueOutOfBoundsException(preset, start=-1, stop=250)
 
         self.set_arguments(self._build_data(("ps", preset)))
 
-    def set_timer(self, minutes: int):
+    def set_timer(self, minutes: int) -> None:
         if minutes < 0 or minutes > 255:
             raise ValueOutOfBoundsException(minutes)
 
         self.set_arguments(self._build_data(("nl.dur", minutes)))
 
-    def set_timer_mode(self, mode: NightlightMode):
+    def set_timer_mode(self, mode: NightlightMode) -> None:
         self.set_arguments(self._build_data(("nl.mode", mode.value)))
 
-    def set_timer_brightness(self, target_brightness: int):
+    def set_timer_brightness(self, target_brightness: int) -> None:
         if target_brightness < 0 or target_brightness > 255:
             raise ValueOutOfBoundsException(target_brightness)
 
         self.set_arguments(self._build_data(("nl.tbri", target_brightness)))
 
-    def set_primary_color(self, color: tuple[int, int, int]):
-        if min(color) < 0 or max(color) > 255:
-            raise ValueOutOfBoundsException(color, (0, 0, 0), (255, 255, 255))
+    def set_colors(self, *colors: tuple[int, int, int]) -> None:  # TODO currently not working
+        for color in colors:
+            if min(color) < 0 or max(color) > 255:
+                raise ValueOutOfBoundsException(color, (0, 0, 0), (255, 255, 255))
 
-        self.set_arguments(self._build_data(("col", '[' + str(list(color)) + ']')))
+        self.set_arguments(self._build_data(("col", '[' + str([str(list(color)) for color in colors]) + ']')))
 
-    def set_effect(self, effect: int):
+    def set_effect(self, effect: int) -> None:  # TODO currently not working
         if effect < 0 or effect > 101:
             raise ValueOutOfBoundsException(effect, stop=101)
 
         self.set_arguments(self._build_data(("fx", effect)))
 
-    def set_effect_speed(self, speed: int):
+    def set_effect_speed(self, speed: int) -> None:  # TODO currently not working
         if speed < 0 or speed > 255:
             raise ValueOutOfBoundsException(speed)
 
         self.set_arguments(self._build_data(("sx", speed)))
 
-    def set_effect_intensity(self, intensity: int):
+    def set_effect_intensity(self, intensity: int) -> None:  # TODO currently not working
         if intensity < 0 or intensity > 255:
             raise ValueOutOfBoundsException(intensity)
 
