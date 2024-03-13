@@ -1,4 +1,5 @@
 import json
+import math
 from datetime import datetime
 from enum import Enum
 
@@ -27,20 +28,24 @@ class WLedController:
     def __init__(self, wled_socket: str, log: bool = True) -> None:
         self.api_url = f"http://{wled_socket}/"
         self.json_url = self.api_url + "json/"
-        self.log = log
+        self._log = log
 
         try:
             self.get_status()
         except:
             raise UnreachableSocketException(wled_socket)
 
+
+
+
+    # private assisting methods
     @staticmethod
     def _get_request(request: str):
-        return requests.get(request, proxies={'http': "http://localhost:3128"})
+        return requests.get(request)
 
     @staticmethod
     def _post_request(request: str, arguments: str):
-        return requests.post(request, arguments, proxies={'http': "http://localhost:3128"})
+        return requests.post(request, arguments)
 
     @staticmethod
     def _timestamp() -> str:
@@ -53,18 +58,25 @@ class WLedController:
     def _logging(self, msg: str):
         print(f"{self._timestamp()}: {msg}")
 
+
+
+
+    # config settings
     def activate_log(self):
-        self.log = True
+        self._log = True
 
     def deactivate_log(self):
-        self.log = False
+        self._log = False
 
+    # get requests
     def get_version(self):
-        print(self.json_url + "version")
-        return self._get_request(self.json_url + "version").text
+        return self._get_request(self.api_url + "version").text
 
     def get_free_heap(self):
-        return self._get_request(self.json_url + "freeheap").text
+        return self._get_request(self.api_url + "freeheap").text
+
+    def get_uptime(self):
+        return self._get_request(self.api_url + "uptime").text
 
     def get_status(self, specification: Specifier = Specifier.none, main_key: str = None) -> dict:
         response = self._get_request(self.json_url + specification.value).json()
@@ -79,8 +91,12 @@ class WLedController:
     def get_timer(self):
         return self.get_status(Specifier.state, "nl")["rem"]
 
+
+
+
+    # nonparametric functions
     def reboot(self):
-        self.set_arguments(self._build_data(("rb", "true")))
+        return self._get_request(self.api_url + "reboot").text
 
     def activate(self):
         self.set_arguments(self._build_data(("on", "true")))
@@ -103,18 +119,28 @@ class WLedController:
     def deactivate_live(self):
         self.set_arguments(self._build_data(("live", 'false')))
 
+    def freeze(self):
+        self.set_arguments(self._build_data(("frz", 'true')))
+
+    def unfreeze(self):
+        self.set_arguments(self._build_data(("frz", 'false')))
+
+
+
+
+    # parametric functions
     def set_arguments(self, arguments: str):
         try:
             status = list(json.loads(self._post_request(self.json_url, arguments).text))[0]
 
-            if self.log:
+            if self._log:
                 self._logging(f"{arguments} --> {status}")
 
             if status == "error":
                 raise InvalidArgumentException(arguments)
 
         except:
-            if self.log:
+            if self._log:
                 self._logging(f"major error occured with argument {arguments}")
 
             raise Exception(f"'{arguments}' resulted in an Error.")
@@ -126,16 +152,16 @@ class WLedController:
         self.set_arguments(self._build_data(("bri", brightness)))
 
     def set_transition(self, milliseconds: int):
-        milliseconds = milliseconds // 100
+        milliseconds = milliseconds / 100
 
         if milliseconds < 0 or milliseconds > 65535:
-            raise ValueOutOfBoundsException(milliseconds)
+            raise ValueOutOfBoundsException(milliseconds, stop=65535)
 
-        self.set_arguments(self._build_data(("transition", milliseconds)))
+        self.set_arguments(self._build_data(("transition", math.floor(milliseconds))))
 
     def set_preset(self, preset: int):
         if preset < -1 or preset > 250:
-            raise ValueOutOfBoundsException(preset)
+            raise ValueOutOfBoundsException(preset, start=-1, stop=250)
 
         self.set_arguments(self._build_data(("ps", preset)))
 
@@ -177,20 +203,3 @@ class WLedController:
             raise ValueOutOfBoundsException(intensity)
 
         self.set_arguments(self._build_data(("ix", intensity)))
-
-    def freeze(self):
-        self.set_arguments(self._build_data(("frz", 'true')))
-
-    def unfreeze(self):
-        self.set_arguments(self._build_data(("frz", 'false')))
-
-
-wled = WLedController("130.185.38.241:8080")
-print(wled.get_version())
-print(wled.get_free_heap())
-wled.deactivate()
-
-# url
-# reset
-# uptime
-# print(requests.get("http://130.185.38.241:8080/freeheap", proxies={'http': "http://localhost:3128"}).json())
