@@ -3,13 +3,13 @@ from distutils.core import setup
 setup(
     name='WLedController',
     packages=['WLedController'],
-    version='0.1',
+    version='0.2',
     license='MIT',
     description='simple implementation of the json-api from WLed https://kno.wled.ge/interfaces/json-api/',
     author='Tjorven Burdorf',
     author_email='BurdorfTjorven@gmail.com',
     url='https://github.com/tj0vtj0v/WLedController',
-    download_url='https://github.com/tj0vtj0v/WLedController/archive/refs/tags/Alpha.tar.gz',
+    download_url='',
     keywords=['WLed', 'IoT', 'Connector', 'API'],
     install_requires=['requests'],
     classifiers=[
