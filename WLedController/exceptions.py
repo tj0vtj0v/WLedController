@@ -1,6 +1,6 @@
-class UnreachableAddressException(Exception):
-    def __init__(self, ip_address: str):
-        super().__init__(f"The IP-Address '{ip_address}' is not reachable.")
+class UnreachableSocketException(Exception):
+    def __init__(self, socket: str):
+        super().__init__(f"The Socket '{socket}' is not reachable.")
 
 
 class ValueOutOfBoundsException(Exception):
@@ -8,6 +8,11 @@ class ValueOutOfBoundsException(Exception):
         super().__init__(f"The Value '{value}' is out of the range ({start}, {stop}).")
 
 
-class ArgumentNotValidException(Exception):
+class InvalidArgumentException(Exception):
     def __init__(self, argument: str):
         super().__init__(f"The argument '{argument}' is not valid.")
+
+
+class InvalidMainKeyException(Exception):
+    def __init__(self, main_key: str):
+        super().__init__(f"The main key '{main_key}' is not valid.")
