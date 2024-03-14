@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='WLedController',
-    packages=['WLedController'],
+    packages=[''],
     version='0.3',
     license='MIT',
     description='simple implementation of the json-api from WLeds https://kno.wled.ge/interfaces/json-api/',
