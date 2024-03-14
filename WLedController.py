@@ -162,27 +162,27 @@ class WLedController:
 
         self.set_arguments(self._build_data(("nl.tbri", target_brightness)))
 
-    def set_colors(self, *colors: tuple[int, int, int]) -> None:  # TODO currently not working
+    def set_colors(self, *colors: list[int, int, int]) -> None:
         for color in colors:
             if min(color) < 0 or max(color) > 255:
                 raise exceptions.ValueOutOfBoundsException(color, (0, 0, 0), (255, 255, 255))
 
-        self.set_arguments(self._build_data(("col", '[' + str([str(list(color)) for color in colors]) + ']')))
+        self.set_arguments(self._build_data(("seg", self._build_data(("col", str(list(colors)))))))
 
-    def set_effect(self, effect: int) -> None:  # TODO currently not working
-        if effect < 0 or effect > 101:
+    def set_effect(self, effect: int) -> None:
+        if effect < 0 or effect > 117:
             raise exceptions.ValueOutOfBoundsException(effect, stop=101)
 
-        self.set_arguments(self._build_data(("fx", effect)))
+        self.set_arguments(self._build_data(("seg", self._build_data(("fx", effect)))))
 
-    def set_effect_speed(self, speed: int) -> None:  # TODO currently not working
+    def set_effect_speed(self, speed: int) -> None:
         if speed < 0 or speed > 255:
             raise exceptions.ValueOutOfBoundsException(speed)
 
-        self.set_arguments(self._build_data(("sx", speed)))
+        self.set_arguments(self._build_data(("seg", self._build_data(("sx", speed)))))
 
-    def set_effect_intensity(self, intensity: int) -> None:  # TODO currently not working
+    def set_effect_intensity(self, intensity: int) -> None:
         if intensity < 0 or intensity > 255:
             raise exceptions.ValueOutOfBoundsException(intensity)
 
-        self.set_arguments(self._build_data(("ix", intensity)))
+        self.set_arguments(self._build_data(("seg", self._build_data(("ix", intensity)))))
