@@ -9,7 +9,7 @@ setup(
     author='Tjorven Burdorf',
     author_email='BurdorfTjorven@gmail.com',
     url='https://github.com/tj0vtj0v/WLedController',
-    download_url='',
+    download_url='https://github.com/tj0vtj0v/WLedController/archive/refs/tags/v_0.2.1.tar.gz',
     keywords=['WLed', 'IoT', 'Connector', 'API'],
     install_requires=['requests'],
     classifiers=[
