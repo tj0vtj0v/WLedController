@@ -5,7 +5,7 @@ from enum import Enum
 
 import requests.exceptions
 
-from exceptions import *
+from .exceptions import *
 
 
 class Specifier(Enum):
