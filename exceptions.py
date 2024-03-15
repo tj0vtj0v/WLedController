@@ -5,7 +5,7 @@ class UnreachableSocketException(Exception):
 
 class ValueOutOfBoundsException(Exception):
     def __init__(self, value, start=0, stop=255):
-        super().__init__(f"The Value '{value}' is out of the range ({start}, {stop}).")
+        super().__init__(f"The Value '{value}' is out of the range ({str(start)}, {str(stop)}).")
 
 
 class InvalidArgumentException(Exception):
