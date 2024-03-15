@@ -201,6 +201,3 @@ class WLedController:
             raise exceptions.ValueOutOfBoundsException(intensity)
 
         self.set_arguments(self._build_data(("seg", self._build_data(("ix", intensity)))))
-
-
-WLedController("192.168.178.42").set_preset(10)
