@@ -179,8 +179,8 @@ class WLedController:
     def set_colors(self, *colors: list[int, int, int]) -> None:
         for color in colors:
             if min(color) < self._MIN_BYTE or max(color) > self._MAX_BYTE:
-                raise exceptions.ValueOutOfBoundsException(color, (self._MIN_BYTE, self._MIN_BYTE, self._MIN_BYTE),
-                                                           (self._MAX_BYTE, self._MAX_BYTE, self._MAX_BYTE))
+                raise exceptions.ValueOutOfBoundsException(color, [self._MIN_BYTE, self._MIN_BYTE, self._MIN_BYTE],
+                                                           [self._MAX_BYTE, self._MAX_BYTE, self._MAX_BYTE])
 
         self.set_arguments(self._build_data(("seg", self._build_data(("col", str(list(colors)))))))
 
